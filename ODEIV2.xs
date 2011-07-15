@@ -56,7 +56,11 @@ int diff_eqs (double t, const double y[], double f[], void *params) {
 
 }
 
-SV* c_ode_solver (SV* eqn, double t1, double t2, int steps) {
+/* c_ode_solver needs stack to be clear when called,
+   I recommend `local @_;` before calling. */
+SV* c_ode_solver
+  (SV* eqn, double t1, double t2, int steps, int step_type_num, double h_step,
+    double epsabs, double epsrel, double a_y, double a_dydt) {
 
   dSP;
 
@@ -66,6 +70,24 @@ SV* c_ode_solver (SV* eqn, double t1, double t2, int steps) {
   double t = t1;
   double y[num];
   AV* ret = newAV();
+  gsl_odeiv2_step_type * step_type;
+
+  // create step_type_num, selected with $opt->{type}
+  // then .pm converts user choice to number
+  if (step_type_num == 1) {
+    step_type = gsl_odeiv2_step_rk2;
+  } else if (step_type_num == 2) {
+    step_type = gsl_odeiv2_step_rk4;
+  } else if (step_type_num == 3) {
+    step_type = gsl_odeiv2_step_rkf45;
+  } else if (step_type_num == 4) {
+    step_type = gsl_odeiv2_step_rkck;
+  } else if (step_type_num == 5) {
+    step_type = gsl_odeiv2_step_rk8pd;
+  } else {
+    warn("Could not determine step type, using rk8pd");
+    step_type = gsl_odeiv2_step_rk8pd;
+  }
 
   ENTER;
   SAVETMPS;
@@ -91,8 +113,9 @@ SV* c_ode_solver (SV* eqn, double t1, double t2, int steps) {
   gsl_odeiv2_system sys = {diff_eqs, NULL, num, &myparams};
      
   gsl_odeiv2_driver * d = 
-    gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rk8pd,
-   				    1e-6, 1e-6, 0.0);
+    gsl_odeiv2_driver_alloc_standard_new (
+      &sys, step_type, h_step, epsabs, epsrel, a_y, a_dydt
+    );
      
   for (i = 1; i <= steps; i++)
     {
@@ -104,6 +127,10 @@ SV* c_ode_solver (SV* eqn, double t1, double t2, int steps) {
           warn("error, return value=%d\n", status);
           break;
         }
+
+      /* At this point I envision that PDL could be used to store the data
+         rather than creating tons of SVs. Of course the current behavior
+         should remain for those systems without PDL */
 
       AV* data = newAV();
       av_push(data, newSVnv(t));
@@ -129,9 +156,14 @@ char *
 get_gsl_version ()
 
 SV *
-c_ode_solver (eqn, t1, t2, steps)
+c_ode_solver (eqn, t1, t2, steps, step_type_num, h_step, epsabs, epsrel, a_y, a_dydt)
 	SV *	eqn
 	double	t1
 	double	t2
 	int	steps
-
+	int	step_type_num
+	double	h_step
+	double	epsabs
+	double	epsrel
+	double	a_y
+	double	a_dydt
