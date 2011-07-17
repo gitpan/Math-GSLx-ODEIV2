@@ -14,7 +14,7 @@ our @EXPORT_OK = ( qw/ get_gsl_version get_step_types / );
 our %EXPORT_TAGS;
 push @{$EXPORT_TAGS{all}}, @EXPORT, @EXPORT_OK;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 $VERSION = eval $VERSION;
 
 our $Verbose = 0;
@@ -74,7 +74,7 @@ sub ode_solver {
     } elsif ($opts->{scaling} eq 'yp') {
       ($a_y, $a_dydt) = (1, 0);
     } else {
-      carp "Could not understand error_type specification. Using defaults.";
+      carp "Could not understand scaling specification. Using defaults.";
     }
   }
 
