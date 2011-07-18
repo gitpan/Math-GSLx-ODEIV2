@@ -56,6 +56,28 @@ int diff_eqs (double t, const double y[], double f[], void *params) {
 
 }
 
+//--------------------------------------------
+// These functions when properly replaced could implement a PDL backend
+
+SV * make_container () {
+  return newRV_noinc((SV*)newAV());
+}
+
+int store_data (SV* holder, int num, const double t, const double y[]) {
+  int i;
+  AV* data = newAV();
+
+  av_push(data, newSVnv(t));
+  for (i = 0; i < num; i++) {
+    av_push(data, newSVnv(y[i]));
+  }
+
+  av_push((AV *)SvRV(holder), newRV_noinc((SV *)data));
+
+  return 0;
+}
+//--------------------------------------------
+
 /* c_ode_solver needs stack to be clear when called,
    I recommend `local @_;` before calling. */
 SV* c_ode_solver
@@ -66,11 +88,9 @@ SV* c_ode_solver
 
   int num;
   int i;
-  int j;
   double t = t1;
-  double y[num];
-  AV* ret = newAV();
-  AV* intvals = newAV();
+  double * y;
+  SV* ret = make_container();
   const gsl_odeiv2_step_type * step_type;
 
   // create step_type_num, selected with $opt->{type}
@@ -96,6 +116,7 @@ SV* c_ode_solver
   PUSHMARK(SP);
 
   num = call_sv(eqn, G_ARRAY|G_NOARGS);
+  New(1, y, num, double);
 
   SPAGAIN;
 
@@ -107,16 +128,7 @@ SV* c_ode_solver
   FREETMPS;
   LEAVE;
 
-  // --------------------------------------------------
-  // this mechanism would change if using a PDL backend
-  // create a row of data containing the initial values
-  // then push intvals onto ret
-  av_push(intvals, newSVnv(t));
-  for (i = 0; i < num; i++) {
-    av_push(intvals, newSVnv(y[i]));
-  }
-  av_push(ret, newRV_inc((SV *)intvals));
-  // --------------------------------------------------
+  store_data(ret, num, t, y);
 
   struct params myparams;
   myparams.num = num;
@@ -144,18 +156,13 @@ SV* c_ode_solver
          rather than creating tons of SVs. Of course the current behavior
          should remain for those systems without PDL */
 
-      AV* data = newAV();
-      av_push(data, newSVnv(t));
-      for (j = 0; j < num; j++) {
-        av_push(data, newSVnv(y[j]));
-      }
-
-      av_push(ret, newRV_inc((SV *)data));
+      store_data(ret, num, t, y);
     }
      
-  gsl_odeiv2_driver_free (d);
+  gsl_odeiv2_driver_free(d);
+  Safefree(y);
 
-  return newRV_inc((SV *)ret);
+  return ret;
 }
 
 
