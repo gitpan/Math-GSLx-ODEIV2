@@ -14,7 +14,7 @@ our @EXPORT_OK = ( qw/ get_gsl_version get_step_types / );
 our %EXPORT_TAGS;
 push @{$EXPORT_TAGS{all}}, @EXPORT, @EXPORT_OK;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 $VERSION = eval $VERSION;
 
 our $Verbose = 0;
@@ -63,8 +63,8 @@ sub ode_solver {
   my $h_step = (exists $opts->{h_step}) ? $opts->{h_step} : 1e-6;
 
   # Error levels
-  my $epsabs = (exists $opts->{epsabs}) ? $opts->{espabs} : 1e-6;
-  my $epsrel = (exists $opts->{epsrel}) ? $opts->{esprel} : 0.0;
+  my $epsabs = (exists $opts->{epsabs}) ? $opts->{epsabs} : 1e-6;
+  my $epsrel = (exists $opts->{epsrel}) ? $opts->{epsrel} : 0.0;
 
   # Error types (set error scaling with logical name)
   my ($a_y, $a_dydt) = (1, 0);
@@ -123,10 +123,9 @@ Math::GSLx::ODEIV2 - Solve ODEs using Perl and GSL v1.15+
    my ($t, @y) = @_;
    
    #example:   y''(t)==-y(t)
-   #i.e.:        ( y'=v, v'=-y ) 
    my @derivs = (
-     $y[1],
-     -$y[0],
+     $y[1],	# y'[0] = y[1]
+     -$y[0],	# y'[1] = - y[0]
    );
    return @derivs;
  }
@@ -223,7 +222,7 @@ C<scaling>, a shorthand for setting the above option. The available values may b
 
 =head3 return
 
-The return is an array reference of array references. Each element of the outer array reference will contain the time and function value of each function in order as above. This format allows easy loading into L<PDL> if so desired:
+The return is an array reference of array references. Each inner array reference will contain the time and function value of each function in order as above. This format allows easy loading into L<PDL> if so desired:
 
  $pdl = pdl($solution);
 

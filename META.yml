@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Math-GSLx-ODEIV2
-version:            0.04
+version:            0.05
 abstract:           Solve ODEs using Perl and GSL v1.15+
 author:
     - Joel Berger <joel.a.berger@gmail.com>
