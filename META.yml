@@ -1,27 +1,23 @@
---- #YAML:1.0
-name:               Math-GSLx-ODEIV2
-version:            0.05
-abstract:           Solve ODEs using Perl and GSL v1.15+
+---
+abstract: 'Solve ODEs using Perl and GSL v1.15+'
 author:
-    - Joel Berger <joel.a.berger@gmail.com>
-license:            perl
-distribution_type:  module
-configure_requires:
-    ExtUtils::MakeMaker:  0
+  - 'Joel Berger <joel.a.berger@gmail.com>'
 build_requires:
-    ExtUtils::MakeMaker:  0
-requires:
-    parent:  0
-resources:
-    repository:
-        type:  git
-        url:   git://github.com:jberger/Math-GSLx-ODEIV2.git
-        web:   http://github.com/jberger/Math-GSLx-ODEIV2
-no_index:
-    directory:
-        - t
-        - inc
-generated_by:       ExtUtils::MakeMaker version 6.57_05
+  ExtUtils::MakeMaker: 0
+configure_requires:
+  ExtUtils::MakeMaker: 0
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 6.59, CPAN::Meta::Converter version 2.112150'
+license: perl
 meta-spec:
-    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
-    version:  1.4
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Math-GSLx-ODEIV2
+no_index:
+  directory:
+    - t
+    - inc
+requires:
+  parent: 0
+resources: {}
+version: 0.06

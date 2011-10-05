@@ -5,5 +5,8 @@ ODEIV2.xs
 ppport.h
 README
 t/sine.t
+t/sine_bad.t
+t/sine_jacobian.t
 lib/Math/GSLx/ODEIV2.pm
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)

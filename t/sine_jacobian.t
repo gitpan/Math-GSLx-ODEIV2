@@ -26,11 +26,24 @@ sub eqn {
   return @derivs;
 }
 
+sub jacobian {
+  my ($t, @y) = @_;
+
+  my $jacobian = [
+    [0, 1],
+    [-1, 0],
+  ];
+
+  my $dfdt = [0, 0];
+
+  return ($jacobian, $dfdt);
+}
+
 ## Test basic functionality ##
 
 {
 
-  my $sin = ode_solver(\&eqn, [0, 2*3.14, 100]);
+  my $sin = ode_solver([\&eqn, \&jacobian], [0, 2*3.14, 100], {type => 'bsimp'});
 
   is( ref $sin, "ARRAY", "ode_solver returns array ref" );
 
@@ -48,10 +61,9 @@ sub eqn {
 ## Test step type option ##
 
 foreach my $step_type (get_step_types()) {
-  #skip steps which require Jacobian
-  next if ($step_type =~ /_j$/);
+  $comp_level = "%0.3f" if ($step_type =~ /rk1/);
 
-  my $type_sin = ode_solver(\&eqn, [0, 2*3.14, 100], {type => $step_type});
+  my $type_sin = ode_solver([\&eqn, \&jacobian], [0, 2*3.14, 100], {type => $step_type});
   my ($type_pi_by_2) = grep { sprintf("%.2f", $_->[0]) == 1.57 } @$type_sin;
   is( sprintf($comp_level, $type_pi_by_2->[1]), sprintf($comp_level, 1), "found sin(pi/2) == 1 using {type => $step_type}");
 }
@@ -68,7 +80,7 @@ foreach my $step_type (get_step_types()) {
   );
 
   foreach my $error_test (@error_tests) {
-    my $type_sin = ode_solver(\&eqn, [0, 2*3.14, 100], $error_test);
+    my $type_sin = ode_solver([\&eqn, \&jacobian], [0, 2*3.14, 100], $error_test);
     my ($type_pi_by_2) = grep { sprintf("%.2f", $_->[0]) == 1.57 } @$type_sin;
     is( sprintf($comp_level, $type_pi_by_2->[1]), sprintf($comp_level, 1), "found sin(pi/2) == 1 using " . Dumper $error_test);
   }
