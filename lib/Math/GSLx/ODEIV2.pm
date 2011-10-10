@@ -14,7 +14,7 @@ our @EXPORT_OK = ( qw/ get_gsl_version get_step_types / );
 our %EXPORT_TAGS;
 push @{$EXPORT_TAGS{all}}, @EXPORT, @EXPORT_OK;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 $VERSION = eval $VERSION;
 
 our $Verbose = 0;
@@ -49,15 +49,14 @@ sub ode_solver {
   ## Parse Options ##
 
   # Time range
-  my @t_range;
-  if (ref $t_range eq 'ARRAY') {
-    @t_range = @$t_range;
-  } elsif (looks_like_number $t_range) {
-    #if $t_range is a single number assume t starts at 0 and has 100 steps
-    @t_range = (0, $t_range, 100);
-  } else {
-    croak "Could not understand 't range'"; 
-  }
+  unless (ref $t_range eq 'ARRAY') {
+    if (looks_like_number $t_range) {
+      #if $t_range is a single number assume t starts at 0 and has 100 steps
+      $t_range = [0, $t_range, 100];
+    } else {
+      croak "Could not understand 't range'";
+    }
+  } 
 
   # Step type
   my $step_type = 0;
@@ -116,7 +115,7 @@ sub ode_solver {
   {
     local @_; #be sure the stack is clear before calling c_ode_solver!
     $result = c_ode_solver(
-      $eqn, $jac, @t_range, $step_type, $h_init, $h_max, $epsabs, $epsrel, $a_y, $a_dydt
+      $eqn, $jac, @$t_range, $step_type, $h_init, $h_max, $epsabs, $epsrel, $a_y, $a_dydt
     );
   }
 
