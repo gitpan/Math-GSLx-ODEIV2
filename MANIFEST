@@ -1,15 +1,13 @@
+Build.PL
 Changes
-Makefile.PL
-MANIFEST
-ODEIV2.xs
-ppport.h
-README
+lib/Math/GSLx/ODEIV2.pm
+MANIFEST			This list of files
+META.json
+META.yml
+README.pod
 t/00-use.t
-t/odes_simple.t
 t/ode_system.t
+t/odes_simple.t
 t/sine.t
 t/sine_bad.t
 t/sine_jacobian.t
-lib/Math/GSLx/ODEIV2.pm
-META.yml                                 Module YAML meta-data (added by MakeMaker)
-META.json                                Module JSON meta-data (added by MakeMaker)
